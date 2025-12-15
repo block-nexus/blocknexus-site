@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-background text-white antialiased;
+}
+
+.main-gradient {
+  background: radial-gradient(circle at top, rgba(59,130,246,0.35), transparent 55%),
+    radial-gradient(circle at bottom, rgba(16,185,129,0.25), transparent 55%);
+}
+
+.card-surface {
+  @apply bg-slate-900/60 border border-slate-800/80 backdrop-blur-xl;
+}
+
+.section-padding {
+  @apply py-20 md:py-28;
+}
