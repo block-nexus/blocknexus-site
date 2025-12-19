@@ -1,25 +1,37 @@
 import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
+import { ThemeProvider } from '../components/ThemeProvider';
+import { ErrorBoundary } from '../components/ErrorBoundary';
+
+const inter = Inter({
+  weight: ['300', '400', '500', '600', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
-  title: 'BlockNexus | Unified Blockchain Infrastructure',
+  title: 'Block Nexus | AI & Web3 Consulting Services',
   description:
-    'BlockNexus provides unified blockchain infrastructure for exchanges, fintechs, and enterprises. Reliable node, data, and monitoring in a single platform.',
+    'Block Nexus LLC provides expert AI & Web3 consulting services. Security assessments, learning, strategy, and implementation.',
   metadataBase: new URL('https://blocknexus.tech'),
   openGraph: {
-    title: 'BlockNexus | Unified Blockchain Infrastructure',
+    title: 'Block Nexus | AI & Web3 Consulting Services',
     description:
-      'Unified node, data, and observability infrastructure for exchanges, fintechs, and enterprises.',
+      'Technology services company specializing in AI & Web3. Security-first consulting and implementation.',
     url: 'https://blocknexus.tech',
-    siteName: 'BlockNexus',
+    siteName: 'Block Nexus',
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="main-gradient min-h-screen">
-        {children}
+    <html lang="en" className={inter.variable} data-theme="dark">
+      <body className="main-gradient min-h-screen font-sans">
+        <ErrorBoundary>
+          <ThemeProvider>{children}</ThemeProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

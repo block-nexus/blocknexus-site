@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     let body;
     try {
       body = await req.json();
-    } catch (parseError) {
+    } catch {
       return NextResponse.json(
         {
           error: ERROR_MESSAGES.FORM_INVALID,

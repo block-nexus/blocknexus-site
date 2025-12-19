@@ -1,84 +1,68 @@
 import Link from 'next/link';
-import { strings } from '../content/strings';
+import Image from 'next/image';
 
 export function Hero() {
   return (
     <section className="section-padding">
-      <div className="grid gap-10 md:grid-cols-[3fr,2fr] md:items-center">
-        <div className="space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-emerald-300">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            <span>Unified blockchain infrastructure</span>
+      <div className="space-y-16">
+        {/* Main hero content */}
+        <div className="max-w-4xl mx-auto space-y-8 text-center">
+          <div className="logo-shimmer-4 flex justify-center">
+            <Image
+              src="/block-nexus-logo.png"
+              alt="Block Nexus"
+              width={240}
+              height={54}
+              className="h-12 md:h-14 w-auto"
+              priority
+            />
           </div>
-          <h1 className="text-balance text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl md:text-5xl">
-            Run blockchain infrastructure
-            <span className="text-primary-400"> without the operational drag.</span>
+          
+          <h1 className="text-heading md:text-display-sm font-bold text-slate-50">
+            AI & Web3 Consulting with{' '}
+            <span className="text-gradient">Enterprise Security</span>{' '}
+            Expertise
           </h1>
-          <p className="max-w-xl text-balance text-sm text-slate-300 md:text-base">
-            {strings.tagline}
+          
+          <p className="max-w-2xl mx-auto text-body text-slate-400">
+            AI & Web3 strategy and implementation services for enterprises, startups, and regulated
+            environments. Built on deep IT and cybersecurity expertise—helping organizations
+            successfully adopt AI & Web3 with security-first principles.
           </p>
-          <div className="flex flex-wrap items-center gap-3">
-            <Link
-              href="/contact"
-              className="rounded-full bg-primary-500 px-5 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-primary-500/40 transition hover:bg-primary-400"
-            >
-              {strings.primaryCta}
-            </Link>
-            <Link
-              href="/product"
-              className="rounded-full border border-slate-700 px-5 py-2 text-xs font-medium text-slate-200 transition hover:border-slate-500 hover:text-white"
-            >
-              {strings.secondaryCta}
-            </Link>
+        </div>
+
+        {/* Stats row */}
+        <div className="grid grid-cols-2 gap-6 md:grid-cols-5 text-center">
+          <div>
+            <p className="text-2xl md:text-4xl font-bold text-slate-50">20+</p>
+            <p className="mt-2 text-sm md:text-base text-slate-400">Years Experience</p>
           </div>
-          <div className="flex flex-wrap items-center gap-5 pt-3 text-[11px] text-slate-400">
-            <span>99.99% uptime</span>
-            <span className="h-1 w-1 rounded-full bg-slate-600" />
-            <span>Multi-chain coverage</span>
-            <span className="h-1 w-1 rounded-full bg-slate-600" />
-            <span>Enterprise-grade support</span>
+          <div>
+            <p className="text-2xl md:text-4xl font-bold text-slate-50">100+</p>
+            <p className="mt-2 text-sm md:text-base text-slate-400">Projects Delivered</p>
+          </div>
+          <div>
+            <p className="text-2xl md:text-4xl font-bold text-slate-50">$15M+</p>
+            <p className="mt-2 text-sm md:text-base text-slate-400">Value Delivered</p>
+          </div>
+          <div>
+            <p className="text-xl md:text-3xl font-bold text-emerald-400">AI</p>
+            <p className="mt-2 text-sm md:text-base text-slate-400">Certified</p>
+          </div>
+          <div>
+            <p className="text-lg md:text-3xl font-bold text-emerald-400">Security</p>
+            <p className="mt-2 text-sm md:text-base text-slate-400">Certified</p>
           </div>
         </div>
-        <div className="relative">
-          <div className="card-surface relative overflow-hidden rounded-2xl p-5">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.35),_transparent_60%),radial-gradient(circle_at_bottom,_rgba(16,185,129,0.25),_transparent_55%)] opacity-70" />
-            <div className="relative space-y-4">
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-400">
-                Live network health
-              </p>
-              <div className="grid grid-cols-3 gap-3 text-xs">
-                <div className="rounded-xl bg-slate-900/60 p-3 ring-1 ring-slate-800/80">
-                  <p className="text-[11px] text-slate-400">Avg. block time</p>
-                  <p className="mt-1 text-base font-semibold text-slate-50">0.9s</p>
-                  <p className="mt-1 text-[10px] text-emerald-400">Stable</p>
-                </div>
-                <div className="rounded-xl bg-slate-900/60 p-3 ring-1 ring-slate-800/80">
-                  <p className="text-[11px] text-slate-400">Success rate</p>
-                  <p className="mt-1 text-base font-semibold text-slate-50">99.99%</p>
-                  <p className="mt-1 text-[10px] text-emerald-400">SLA-backed</p>
-                </div>
-                <div className="rounded-xl bg-slate-900/60 p-3 ring-1 ring-slate-800/80">
-                  <p className="text-[11px] text-slate-400">Chains</p>
-                  <p className="mt-1 text-base font-semibold text-slate-50">25+</p>
-                  <p className="mt-1 text-[10px] text-slate-400">EVM & more</p>
-                </div>
-              </div>
-              <div className="grid gap-3 text-xs md:grid-cols-2">
-                <div className="rounded-xl bg-slate-900/60 p-3 ring-1 ring-slate-800/80">
-                  <p className="text-[11px] text-slate-400">Real-time alerts</p>
-                  <p className="mt-1 text-sm text-slate-200">
-                    Detect anomalies across chains and notify your on-call instantly.
-                  </p>
-                </div>
-                <div className="rounded-xl bg-slate-900/60 p-3 ring-1 ring-slate-800/80">
-                  <p className="text-[11px] text-slate-400">Single control plane</p>
-                  <p className="mt-1 text-sm text-slate-200">
-                    Manage networks, keys, and throughput from one dashboard.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+
+        {/* Hero buttons under stats */}
+        <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+          <Link href="/contact" className="btn-primary">
+            Get Started Today
+          </Link>
+          <Link href="/product" className="btn-secondary">
+            Our Services
+          </Link>
         </div>
       </div>
     </section>

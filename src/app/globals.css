@@ -3,22 +3,245 @@
 @tailwind utilities;
 
 :root {
+  /* Default to dark variables; ThemeProvider will override via data-theme */
+  --bg-color: #030712;
+  --text-color: #f9fafb;
   color-scheme: dark;
 }
 
+:root[data-theme='light'],
+[data-theme='light'] {
+  --bg-color: #f9fafb;
+  --text-color: #020617;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'],
+[data-theme='dark'] {
+  --bg-color: #030712;
+  --text-color: #f9fafb;
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  @apply bg-background text-white antialiased;
+  @apply antialiased;
+  background-color: var(--bg-color);
+  color: var(--text-color);
 }
 
 .main-gradient {
-  background: radial-gradient(circle at top, rgba(59,130,246,0.35), transparent 55%),
-    radial-gradient(circle at bottom, rgba(16,185,129,0.25), transparent 55%);
+  background: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59,130,246,0.25), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(16,185,129,0.15), transparent),
+    radial-gradient(ellipse 40% 30% at 0% 80%, rgba(139,92,246,0.1), transparent);
 }
 
 .card-surface {
-  @apply bg-slate-900/60 border border-slate-800/80 backdrop-blur-xl;
+  @apply bg-slate-900/50 border border-slate-800/60 backdrop-blur-2xl rounded-3xl;
+  box-shadow: 
+    0 0 0 1px rgba(255,255,255,0.03) inset,
+    0 4px 24px -4px rgba(0,0,0,0.4);
+}
+
+.card-surface-hover {
+  @apply card-surface transition-all duration-300;
+}
+
+.card-surface-hover:hover {
+  @apply border-slate-700/80 bg-slate-800/50;
+  transform: translateY(-2px);
+  box-shadow: 
+    0 0 0 1px rgba(255,255,255,0.05) inset,
+    0 8px 32px -4px rgba(0,0,0,0.5),
+    0 0 60px -20px rgba(59,130,246,0.15);
 }
 
 .section-padding {
-  @apply py-20 md:py-28;
+  @apply py-24 md:py-32 lg:py-40;
+}
+
+.text-gradient {
+  @apply bg-gradient-to-r from-primary-400 via-primary-300 to-emerald-400 bg-clip-text text-transparent;
+}
+
+/* Premium button styles */
+.btn-primary {
+  @apply inline-flex items-center justify-center rounded-lg bg-primary-500 px-6 py-3 text-sm md:px-8 md:py-4 md:text-base font-semibold text-slate-950 shadow-xl shadow-primary-500/30 transition-all duration-300;
+}
+
+.btn-primary:hover {
+  @apply bg-primary-400 shadow-primary-400/40;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center rounded-lg border border-slate-600 bg-slate-900/50 px-6 py-3 text-sm md:px-8 md:py-4 md:text-base font-medium text-slate-100 backdrop-blur-sm transition-all duration-300;
+}
+
+.btn-secondary:hover {
+  @apply border-slate-500 bg-slate-800/50 text-white;
+}
+
+/* Subtle glow effect */
+.glow {
+  position: relative;
+}
+
+.glow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(16,185,129,0.2));
+  border-radius: inherit;
+  filter: blur(20px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.glow:hover::before {
+  opacity: 1;
+}
+
+/* Animate on scroll */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* Logo shimmer effects - Iteration 1: Continuous shimmer with color shift */
+@keyframes shimmer-1 {
+  0%, 100% {
+    filter: hue-rotate(0deg) brightness(1) saturate(1);
+  }
+  50% {
+    filter: hue-rotate(180deg) brightness(1.2) saturate(1.3);
+  }
+}
+
+.logo-shimmer-1 {
+  position: relative;
+  display: inline-block;
+}
+
+.logo-shimmer-1 img {
+  animation: shimmer-1 3s ease-in-out infinite;
+  transition: filter 0.3s ease;
+}
+
+.logo-shimmer-1:hover img {
+  filter: hue-rotate(200deg) brightness(1.3) saturate(1.4);
+  animation-duration: 1.5s;
+}
+
+/* Logo shimmer effects - Iteration 2: Gradient overlay shimmer */
+@keyframes shimmer-2 {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.logo-shimmer-2 {
+  position: relative;
+  display: inline-block;
+}
+
+.logo-shimmer-2::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.4),
+    rgba(16, 185, 129, 0.4),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: shimmer-2 2s linear infinite;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.logo-shimmer-2:hover::before {
+  opacity: 1;
+}
+
+.logo-shimmer-2:hover img {
+  filter: hue-rotate(160deg) brightness(1.1);
+}
+
+/* Logo shimmer effects - Iteration 3: Pulsing color shift with hover enhancement */
+@keyframes shimmer-3 {
+  0%, 100% {
+    filter: hue-rotate(0deg) brightness(1);
+  }
+  25% {
+    filter: hue-rotate(90deg) brightness(1.1);
+  }
+  50% {
+    filter: hue-rotate(180deg) brightness(1.2);
+  }
+  75% {
+    filter: hue-rotate(270deg) brightness(1.1);
+  }
+}
+
+.logo-shimmer-3 {
+  position: relative;
+  display: inline-block;
+}
+
+.logo-shimmer-3 img {
+  animation: shimmer-3 4s ease-in-out infinite;
+  transition: all 0.3s ease;
+}
+
+.logo-shimmer-3:hover img {
+  filter: hue-rotate(200deg) brightness(1.3) saturate(1.5);
+  animation-duration: 1s;
+}
+
+/* Logo shimmer effects - Iteration 4: Subtle continuous shift with strong hover */
+@keyframes shimmer-4 {
+  0%, 100% {
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    filter: hue-rotate(160deg);
+  }
+}
+
+.logo-shimmer-4 {
+  position: relative;
+  display: inline-block;
+}
+
+.logo-shimmer-4 img {
+  animation: shimmer-4 5s ease-in-out infinite;
+  transition: filter 0.4s ease;
+}
+
+.logo-shimmer-4:hover img {
+  filter: hue-rotate(160deg) brightness(1.2) saturate(1.3);
+  animation-duration: 2s;
 }

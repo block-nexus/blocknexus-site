@@ -1,59 +1,145 @@
+import type { ReactNode } from 'react';
+import { IconBox, BriefcaseIcon, ShieldIcon, ChartIcon, FlaskIcon, LockIcon, BookIcon } from './IconBox';
+
 interface Feature {
   title: string;
   body: string;
-  tag: string;
+  icon: ReactNode;
+  bullets: string[];
 }
 
 const features: Feature[] = [
   {
-    title: 'Unified node & data plane',
-    body: 'Access full nodes, archive data, and indexers through a single, consistent API surface.',
-    tag: 'Infrastructure',
+    title: 'C-Suite & Board Advisory',
+    body: 'Strategic guidance for executives and board members navigating AI & Web3 adoption, technology investments, and digital transformation.',
+    icon: (
+      <IconBox variant="primary">
+        <BriefcaseIcon />
+      </IconBox>
+    ),
+    bullets: [
+      'AI & Web3 readiness assessments and roadmaps',
+      'Technology investment strategy',
+      'Risk management and governance',
+      'Board presentations and planning',
+    ],
   },
   {
-    title: 'Observability built-in',
-    body: 'Deep metrics, traces, and alerts across chains without wiring up your own monitoring stack.',
-    tag: 'Monitoring',
+    title: 'Fractional CISO Services',
+    body: 'Part-time, experienced CISO leadership for organizations needing strategic security guidance without full-time commitment.',
+    icon: (
+      <IconBox variant="emerald">
+        <ShieldIcon />
+      </IconBox>
+    ),
+    bullets: [
+      'Security program development',
+      'Compliance and risk management',
+      'Vendor security assessments',
+      'Incident response planning',
+    ],
   },
   {
-    title: 'Enterprise-grade controls',
-    body: 'Regions, SLAs, role-based access, and audit logs designed for regulated environments.',
-    tag: 'Enterprise',
+    title: 'AI & Web3 Readiness Assessment',
+    body: 'Comprehensive assessments and vendor evaluations to ensure you select the right AI & Web3 solutions.',
+    icon: (
+      <IconBox variant="primary">
+        <ChartIcon />
+      </IconBox>
+    ),
+    bullets: [
+      'Maturity assessments',
+      'Product evaluation and selection',
+      'ROI and business case development',
+      'Security and compliance vetting',
+    ],
   },
   {
-    title: 'Developer-first experience',
-    body: 'SDKs, examples, and sane defaults so teams can ship onchain features in days, not months.',
-    tag: 'DX',
+    title: 'POC Strategy & Execution',
+    body: 'Structured proof-of-concept development with clear success criteria and actionable outcomes.',
+    icon: (
+      <IconBox variant="slate">
+        <FlaskIcon />
+      </IconBox>
+    ),
+    bullets: [
+      'POC scope definition and planning',
+      'Success criteria frameworks',
+      'Security-first implementation',
+      'Results analysis and recommendations',
+    ],
+  },
+  {
+    title: 'Security-First Implementation',
+    body: 'Integrate security and compliance from day one, ensuring AI & Web3 initiatives meet enterprise standards.',
+    icon: (
+      <IconBox variant="emerald">
+        <LockIcon />
+      </IconBox>
+    ),
+    bullets: [
+      'Security architecture design',
+      'Data privacy and protection',
+      'Regulatory compliance alignment',
+      'AI model security assessments',
+    ],
+  },
+  {
+    title: 'Change Management & Training',
+    body: 'Comprehensive training and organizational change management for successful AI & Web3 adoption.',
+    icon: (
+      <IconBox variant="primary">
+        <BookIcon />
+      </IconBox>
+    ),
+    bullets: [
+      'End-user training programs',
+      'Change management strategies',
+      'Adoption optimization',
+      'Ongoing support and enablement',
+    ],
   },
 ];
 
 export function FeatureGrid() {
   return (
-    <section className="section-padding">
-      <div className="space-y-8">
-        <div className="max-w-xl space-y-3">
-          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-slate-400">
-            Platform
-          </p>
-          <h2 className="text-xl font-semibold tracking-tight text-slate-50 md:text-2xl">
-            Everything you need to run serious blockchain workloads.
+    <section className="section-padding border-t border-slate-800/40">
+      <div className="space-y-16">
+        <div className="max-w-3xl space-y-6 mx-auto text-center">
+          <h2 className="text-heading-sm md:text-heading font-bold text-slate-50">
+            Strategic Advisory Services
           </h2>
-          <p className="text-sm text-slate-300">
-            BlockNexus abstracts away node operations and network differences so your teams can
-            focus on product, not plumbing.
+          <p className="text-body text-slate-400">
+            Executive-level guidance for board members, C-suite leaders, and security executives
+            navigating AI & Web3 adoption and digital transformation.
+          </p>
+          <p className="text-base text-slate-500">
+            Our fractional and advisory services provide strategic leadership when you need it,
+            without the commitment of full-time hires.
           </p>
         </div>
-        <div className="grid gap-5 md:grid-cols-2">
+        
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {features.map((feature) => (
-            <div key={feature.title} className="card-surface rounded-2xl p-5">
-              <div className="inline-flex items-center gap-2 rounded-full bg-slate-900/80 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-slate-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary-400" />
-                <span>{feature.tag}</span>
+            <div key={feature.title} className="card-surface-hover p-6 md:p-8 group">
+              <div className="transition-transform group-hover:scale-110">
+                {feature.icon}
               </div>
-              <h3 className="mt-4 text-sm font-semibold text-slate-50">
+              <h3 className="mt-6 text-lg md:text-2xl font-semibold text-slate-50">
                 {feature.title}
               </h3>
-              <p className="mt-2 text-xs text-slate-300">{feature.body}</p>
+              <p className="mt-3 text-sm md:text-base text-slate-400">{feature.body}</p>
+              <ul className="mt-6 space-y-3">
+                {feature.bullets.map((bullet) => (
+                  <li key={bullet} className="flex items-start gap-3 text-sm md:text-base text-slate-400">
+                    <svg className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" fill="none" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
+                    </svg>
+                    {bullet}
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>
