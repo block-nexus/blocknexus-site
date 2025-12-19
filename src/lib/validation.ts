@@ -44,32 +44,35 @@ export const contactFormSchema = z.object({
     .max(200, 'Company name must be less than 200 characters')
     .trim()
     .optional()
-    .or(z.literal('')),
+    .default(''),
   phone: z
     .string()
     .max(20, 'Phone number must be less than 20 characters')
     .refine(
       (phone) => {
-        if (!phone) return true; // Optional field
+        if (!phone || phone === '') return true; // Optional field
         const cleaned = phone.replace(/[\s\-\(\)]/g, '');
         return PHONE_REGEX.test(cleaned) && cleaned.length >= 10 && cleaned.length <= 15;
       },
       { message: 'Please enter a valid phone number' }
     )
     .optional()
-    .or(z.literal('')),
+    .default(''),
   service: z
-    .enum([
-      'web3-strategy',
-      'cybersecurity',
-      'infrastructure',
-      'cloud',
-      'compliance',
-      'transformation',
-      'other',
+    .union([
+      z.enum([
+        'web3-strategy',
+        'cybersecurity',
+        'infrastructure',
+        'cloud',
+        'compliance',
+        'transformation',
+        'other',
+      ]),
+      z.literal(''),
     ])
     .optional()
-    .or(z.literal('')),
+    .default(''),
   consent: z.literal('on', {
     errorMap: () => ({ message: 'You must agree to be contacted' }),
   }),
