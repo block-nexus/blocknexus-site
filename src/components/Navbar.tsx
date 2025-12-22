@@ -10,6 +10,9 @@ const navItems = [
   { href: '/#contact', label: 'Contact' },
 ];
 
+// Whitelist of allowed hash IDs for navigation (prevents scroll hijacking)
+const ALLOWED_HASH_IDS = ['services', 'contact'] as const;
+
 export function Navbar() {
   const pathname = usePathname();
 
@@ -21,10 +24,11 @@ export function Navbar() {
       const id = rawHash.replace(/[^a-zA-Z0-9-]/g, '');
       
       // Only proceed if sanitization didn't change the hash (valid format)
-      if (id && id === rawHash) {
+      // AND the ID is in the whitelist (prevents scroll hijacking)
+      if (id && id === rawHash && ALLOWED_HASH_IDS.includes(id as typeof ALLOWED_HASH_IDS[number])) {
         setTimeout(() => {
           const element = document.getElementById(id);
-          if (element) {
+          if (element && element.tagName !== 'SCRIPT') {
             element.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
         }, 100);
@@ -37,9 +41,10 @@ export function Navbar() {
       e.preventDefault();
       // Sanitize ID to prevent XSS
       const sanitizedId = id.replace(/[^a-zA-Z0-9-]/g, '');
-      if (sanitizedId && sanitizedId === id) {
+      // Only allow whitelisted IDs (prevents scroll hijacking)
+      if (sanitizedId && sanitizedId === id && ALLOWED_HASH_IDS.includes(sanitizedId as typeof ALLOWED_HASH_IDS[number])) {
         const element = document.getElementById(sanitizedId);
-        if (element) {
+        if (element && element.tagName !== 'SCRIPT') {
           element.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       }
@@ -53,9 +58,9 @@ export function Navbar() {
           <Image
             src="/block-nexus-logo.png"
             alt="Block Nexus"
-            width={180}
-            height={40}
-            className="h-10 w-auto"
+            width={120}
+            height={27}
+            className="h-6 w-auto"
             priority
           />
         </Link>
@@ -79,7 +84,7 @@ export function Navbar() {
           <Link
             href="/#contact"
             onClick={handleInPageClick('contact')}
-            className="btn-primary text-sm px-6 py-3"
+            className="inline-flex items-center justify-center rounded-lg bg-primary-500 px-3 py-1.5 text-xs font-semibold text-slate-950 shadow-lg shadow-primary-500/20 transition-all duration-300 hover:bg-primary-400 hover:shadow-primary-400/30"
           >
             Get Started
           </Link>
