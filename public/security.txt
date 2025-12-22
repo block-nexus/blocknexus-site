@@ -1,0 +1,6 @@
+Contact: mailto:contact@blocknexus.tech
+Expires: 2026-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://blocknexus.tech/security.txt
+Policy: https://blocknexus.tech/privacy-policy
+

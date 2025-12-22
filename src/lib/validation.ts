@@ -1,10 +1,11 @@
 import { z } from 'zod';
 
-// Email validation regex (RFC 5322 compliant subset)
-const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+// Simplified email validation regex to prevent ReDoS
+// Zod's .email() already validates format, this is just for disposable email check
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Phone validation regex (allows common formats)
-const PHONE_REGEX = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/;
+// Phone validation now uses simple length and digit checks to prevent ReDoS
+// No complex regex with nested quantifiers
 
 // Disposable email domains to block
 const DISPOSABLE_EMAIL_DOMAINS = [
@@ -28,7 +29,8 @@ export const contactFormSchema = z.object({
     .email('Please enter a valid email address')
     .refine(
       (email) => {
-        if (!EMAIL_REGEX.test(email)) return false;
+        // Zod's .email() already validates format, so EMAIL_REGEX is redundant
+        // Just check disposable email domains
         const domain = email.split('@')[1]?.toLowerCase();
         return domain && !DISPOSABLE_EMAIL_DOMAINS.includes(domain);
       },
@@ -51,8 +53,20 @@ export const contactFormSchema = z.object({
     .refine(
       (phone) => {
         if (!phone || phone === '') return true; // Optional field
+        
+        // Simple length check first (prevents ReDoS)
+        if (phone.length < 10 || phone.length > 20) return false;
+        
+        // Remove formatting characters
         const cleaned = phone.replace(/[\s\-\(\)]/g, '');
-        return PHONE_REGEX.test(cleaned) && cleaned.length >= 10 && cleaned.length <= 15;
+        
+        // Validate length after cleaning
+        if (cleaned.length < 10 || cleaned.length > 15) return false;
+        
+        // Simple digit check (prevents ReDoS - no nested quantifiers)
+        if (!/^\+?[0-9]+$/.test(cleaned)) return false;
+        
+        return true;
       },
       { message: 'Please enter a valid phone number' }
     )
@@ -82,6 +96,7 @@ export type ContactFormData = z.infer<typeof contactFormSchema>;
 
 export function validateEmail(email: string): boolean {
   if (!email || email.length > 255) return false;
+  // Use simple regex to prevent ReDoS
   if (!EMAIL_REGEX.test(email)) return false;
   const domain = email.split('@')[1]?.toLowerCase();
   return domain ? !DISPOSABLE_EMAIL_DOMAINS.includes(domain) : false;
@@ -89,7 +104,17 @@ export function validateEmail(email: string): boolean {
 
 export function validatePhone(phone: string): boolean {
   if (!phone) return true; // Optional field
+  
+  // Simple length check first (prevents ReDoS)
+  if (phone.length < 10 || phone.length > 20) return false;
+  
+  // Remove formatting characters
   const cleaned = phone.replace(/[\s\-\(\)]/g, '');
-  return PHONE_REGEX.test(cleaned) && cleaned.length >= 10 && cleaned.length <= 15;
+  
+  // Validate length after cleaning
+  if (cleaned.length < 10 || cleaned.length > 15) return false;
+  
+  // Simple digit check (prevents ReDoS - no nested quantifiers)
+  return /^\+?[0-9]+$/.test(cleaned);
 }
 

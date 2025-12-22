@@ -3,27 +3,29 @@ import Link from 'next/link';
 export function CallToAction() {
   return (
     <section className="section-padding">
-      <div className="card-surface mx-auto max-w-3xl rounded-3xl px-6 py-8 text-center md:px-10 md:py-10">
-        <h2 className="text-xl font-semibold tracking-tight text-slate-50 md:text-2xl">
-          Ready to consolidate your blockchain infrastructure?
-        </h2>
-        <p className="mt-3 text-sm text-slate-300">
-          Share your use case and we&apos;ll walk through how BlockNexus can plug into your
-          existing stack in under an hour.
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Link
-            href="/contact"
-            className="rounded-full bg-primary-500 px-5 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-primary-500/40 transition hover:bg-primary-400"
-          >
-            Talk to our team
-          </Link>
-          <Link
-            href="/product"
-            className="rounded-full border border-slate-700 px-5 py-2 text-xs font-medium text-slate-200 transition hover:border-slate-500 hover:text-white"
-          >
-            View product overview
-          </Link>
+      <div className="relative overflow-hidden">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 via-transparent to-emerald-500/10 rounded-4xl" />
+        
+        <div className="card-surface relative mx-auto max-w-4xl px-6 py-12 text-center md:px-8 md:py-16 lg:px-16 lg:py-20">
+          {/* Decorative elements */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 h-px w-1/2 bg-gradient-to-r from-transparent via-primary-500/50 to-transparent" />
+          
+          <h2 className="text-heading-sm md:text-heading font-bold text-slate-50">
+            Let&apos;s Transform Your Business
+          </h2>
+          <p className="mt-6 text-base md:text-body-lg text-slate-400 max-w-2xl mx-auto">
+            Ready to take your organization to the next level with AI & Web3?
+            Get in touch with our experts today.
+          </p>
+          <div className="mt-10 flex flex-wrap justify-center gap-4">
+            <Link href="/contact" className="btn-primary">
+              Get Started Today
+            </Link>
+            <Link href="/product" className="btn-secondary">
+              View Our Services
+            </Link>
+          </div>
         </div>
       </div>
     </section>

@@ -1,13 +1,17 @@
 'use client';
 
-import { FormEvent, useState, useRef } from 'react';
+import { FormEvent, useState, useRef, useEffect } from 'react';
 import { INPUT_LIMITS, ERROR_MESSAGES, TIMEOUTS } from '@/lib/constants';
+import { validateContactFormClient } from '@/lib/formValidation';
 
 export function ContactForm() {
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const submittingRef = useRef(false);
+  const lastSubmissionHashRef = useRef<string>('');
+  const successMessageRef = useRef<HTMLParagraphElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -17,25 +21,42 @@ export function ContactForm() {
     submittingRef.current = true;
 
     const data = new FormData(event.currentTarget);
-    const formData = {
-      name: data.get('name')?.toString() || '',
-      email: data.get('email')?.toString() || '',
-      message: data.get('message')?.toString() || '',
-      company: data.get('company')?.toString() || '',
-      phone: data.get('phone')?.toString() || '',
-      service: data.get('service')?.toString() || '',
-      consent: data.get('consent')?.toString() || '',
+    
+    // Helper to safely extract string values from FormData (reject File uploads)
+    const getStringValue = (value: FormDataEntryValue | null): string => {
+      if (!value) return '';
+      if (value instanceof File) {
+        // Reject file uploads in text fields (security: prevent file upload bypass)
+        throw new Error('File uploads not allowed in form fields');
+      }
+      return value.toString();
     };
-
-    // Basic client-side validation
-    const errors: Record<string, string> = {};
-    if (!formData.name.trim()) errors.name = 'Name is required';
-    if (!formData.email.trim()) errors.email = 'Email is required';
-    if (!formData.message.trim()) errors.message = 'Message is required';
-    if (formData.message.length < INPUT_LIMITS.MESSAGE_MIN) {
-      errors.message = `Message must be at least ${INPUT_LIMITS.MESSAGE_MIN} characters`;
+    
+    let formData;
+    try {
+      formData = {
+        name: getStringValue(data.get('name')),
+        email: getStringValue(data.get('email')),
+        message: getStringValue(data.get('message')),
+        company: getStringValue(data.get('company')),
+        phone: getStringValue(data.get('phone')),
+        service: getStringValue(data.get('service')),
+        consent: getStringValue(data.get('consent')),
+      };
+    } catch (error) {
+      setStatus('error');
+      setErrorMessage(error instanceof Error ? error.message : ERROR_MESSAGES.FORM_INVALID);
+      submittingRef.current = false;
+      return;
     }
-    if (!formData.consent) errors.consent = 'You must agree to be contacted';
+
+    // Client-side validation (using shared validation function)
+    const errors = validateContactFormClient({
+      name: formData.name,
+      email: formData.email,
+      message: formData.message,
+      consent: formData.consent,
+    });
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
@@ -45,6 +66,20 @@ export function ContactForm() {
       return;
     }
 
+    // Request deduplication: prevent identical rapid submissions
+    const submissionHash = JSON.stringify({
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      message: formData.message.trim(),
+    });
+    
+    if (lastSubmissionHashRef.current === submissionHash && status === 'submitting') {
+      submittingRef.current = false;
+      return; // Deduplicate identical submissions
+    }
+    
+    lastSubmissionHashRef.current = submissionHash;
+    
     setStatus('submitting');
     setErrorMessage('');
     setFieldErrors({});
@@ -59,37 +94,104 @@ export function ContactForm() {
         signal: AbortSignal.timeout(TIMEOUTS.FORM_SUBMISSION),
       });
 
-      const result = await response.json();
+      // Check Content-Type before parsing JSON
+      const contentType = response.headers.get('content-type');
+      let result;
+      
+      try {
+        if (contentType?.includes('application/json')) {
+          result = await response.json();
+        } else {
+          // Handle non-JSON responses (e.g., 413, 415 errors)
+          const text = await response.text();
+          throw new Error(text || ERROR_MESSAGES.FORM_SUBMISSION_FAILED);
+        }
+      } catch {
+        // Handle JSON parse errors
+        throw new Error(ERROR_MESSAGES.FORM_SUBMISSION_FAILED);
+      }
 
       if (!response.ok) {
         throw new Error(result.error || ERROR_MESSAGES.FORM_SUBMISSION_FAILED);
       }
 
       setStatus('success');
-      // Reset form
-      event.currentTarget.reset();
+      // Clear submission hash
+      lastSubmissionHashRef.current = '';
+      
+      // FIX: Don't reset form - keep values visible so user can see what was submitted
+      // Form is already disabled when status is 'success', so no need to reset
+      // This prevents any scroll issues from form reset
     } catch (error) {
-      console.error('Form submission error:', error);
+      // Log errors for debugging (always log errors, but sanitize in production)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Form submission error:', error);
+      }
       setStatus('error');
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
           setErrorMessage(ERROR_MESSAGES.NETWORK_ERROR);
-        } else if (error.message.includes('rate limit')) {
-          setErrorMessage(ERROR_MESSAGES.FORM_RATE_LIMIT);
         } else {
-          setErrorMessage(error.message || ERROR_MESSAGES.FORM_SUBMISSION_FAILED);
+          // Sanitize error messages to prevent information leakage
+          const safeErrorMessages: Record<string, string> = {
+            'rate limit': ERROR_MESSAGES.FORM_RATE_LIMIT,
+            'invalid origin': ERROR_MESSAGES.FORM_SUBMISSION_FAILED,
+            'invalid referer': ERROR_MESSAGES.FORM_SUBMISSION_FAILED,
+            'request too large': ERROR_MESSAGES.FORM_SUBMISSION_FAILED,
+            'file uploads not allowed': ERROR_MESSAGES.FORM_INVALID,
+          };
+          
+          const errorKey = Object.keys(safeErrorMessages).find(key => 
+            error.message.toLowerCase().includes(key.toLowerCase())
+          );
+          
+          if (errorKey) {
+            setErrorMessage(safeErrorMessages[errorKey]);
+          } else {
+            // Don't expose unknown error messages (security: prevent information leakage)
+            setErrorMessage(ERROR_MESSAGES.FORM_SUBMISSION_FAILED);
+          }
         }
       } else {
         setErrorMessage(ERROR_MESSAGES.FORM_SUBMISSION_FAILED);
       }
+      // Clear submission hash on error to allow retry
+      lastSubmissionHashRef.current = '';
     } finally {
       submittingRef.current = false;
     }
   }
 
+  // FIX: Scroll to success message when status changes to success
+  useEffect(() => {
+    if (status === 'success' && successMessageRef.current) {
+      // Use requestAnimationFrame to ensure DOM is fully updated
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (successMessageRef.current) {
+            // Get current scroll position
+            const currentScroll = window.scrollY;
+            const elementTop = successMessageRef.current.getBoundingClientRect().top + currentScroll;
+            const elementHeight = successMessageRef.current.offsetHeight;
+            const viewportHeight = window.innerHeight;
+            
+            // Calculate center position
+            const targetScroll = elementTop - (viewportHeight / 2) + (elementHeight / 2);
+            
+            // Smooth scroll to center the success message
+            window.scrollTo({
+              top: targetScroll,
+              behavior: 'smooth',
+            });
+          }
+        });
+      });
+    }
+  }, [status]);
+
   return (
     <div className="card-surface p-6 md:p-8 lg:p-10">
-      <form onSubmit={handleSubmit} noValidate className="space-y-6">
+      <form ref={formRef} onSubmit={handleSubmit} noValidate className="space-y-6">
         <div className="grid gap-6 md:grid-cols-2">
           <div>
             <label className="mb-2 block text-sm md:text-base font-medium text-slate-200" htmlFor="name">
@@ -247,8 +349,13 @@ export function ContactForm() {
           </p>
         )}
         {status === 'success' && (
-          <p className="text-sm md:text-base text-emerald-400 text-center">
-            Thank you! We&apos;ll be in touch soon.
+          <p 
+            ref={successMessageRef}
+            className="text-sm md:text-base text-emerald-400 text-center font-medium py-2 px-4 rounded-lg bg-emerald-400/10 border border-emerald-400/20"
+            role="alert"
+            aria-live="polite"
+          >
+            ✓ Thank you! We&apos;ll be in touch soon.
           </p>
         )}
       </form>

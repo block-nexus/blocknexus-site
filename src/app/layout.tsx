@@ -16,6 +16,11 @@ export const metadata: Metadata = {
   description:
     'Block Nexus LLC provides expert AI & Web3 consulting services. Security assessments, learning, strategy, and implementation.',
   metadataBase: new URL('https://blocknexus.tech'),
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
   openGraph: {
     title: 'Block Nexus | AI & Web3 Consulting Services',
     description:
