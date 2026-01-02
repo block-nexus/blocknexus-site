@@ -27,10 +27,12 @@ export function Footer() {
               Services
             </h3>
             <ul className="mt-4 space-y-3 text-sm text-slate-500">
-              <li className="hover:text-slate-200 transition-colors cursor-default">Web3 Strategy</li>
+              <li className="hover:text-slate-200 transition-colors cursor-default">AI & Web3 Strategy</li>
               <li className="hover:text-slate-200 transition-colors cursor-default">Cybersecurity</li>
-              <li className="hover:text-slate-200 transition-colors cursor-default">IT Infrastructure</li>
+              <li className="hover:text-slate-200 transition-colors cursor-default">Digital Transformation</li>
               <li className="hover:text-slate-200 transition-colors cursor-default">Cloud Solutions</li>
+              <li className="hover:text-slate-200 transition-colors cursor-default">Compliance & Governance</li>
+              <li className="hover:text-slate-200 transition-colors cursor-default">IT Infrastructure</li>
             </ul>
           </div>
           
