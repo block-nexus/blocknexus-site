@@ -39,7 +39,6 @@ export function ContactForm() {
         email: getStringValue(data.get('email')),
         message: getStringValue(data.get('message')),
         company: getStringValue(data.get('company')),
-        phone: getStringValue(data.get('phone')),
         service: getStringValue(data.get('service')),
         consent: getStringValue(data.get('consent')),
       };
@@ -267,19 +266,6 @@ export function ContactForm() {
               maxLength={INPUT_LIMITS.COMPANY_MAX}
               className="h-12 md:h-14 w-full rounded-xl border border-slate-700 bg-slate-900/50 px-4 text-base md:text-lg text-slate-100 outline-none transition-all placeholder:text-slate-500 focus:border-primary-400 focus:ring-2 focus:ring-primary-500/20"
               placeholder="Your company name"
-            />
-          </div>
-          <div>
-            <label className="mb-2 block text-sm md:text-base font-medium text-slate-200" htmlFor="phone">
-              Phone
-            </label>
-            <input
-              id="phone"
-              name="phone"
-              type="tel"
-              maxLength={INPUT_LIMITS.PHONE_MAX}
-              className="h-12 md:h-14 w-full rounded-xl border border-slate-700 bg-slate-900/50 px-4 text-base md:text-lg text-slate-100 outline-none transition-all placeholder:text-slate-500 focus:border-primary-400 focus:ring-2 focus:ring-primary-500/20"
-              placeholder="(555) 123-4567"
             />
           </div>
         </div>

@@ -39,7 +39,6 @@ export function ContactSection() {
         email: getStringValue(data.get('email')),
         message: getStringValue(data.get('message')),
         company: getStringValue(data.get('company')),
-        phone: getStringValue(data.get('phone')),
         service: getStringValue(data.get('service')),
         consent: getStringValue(data.get('consent')),
       };
@@ -284,19 +283,6 @@ export function ContactSection() {
                       placeholder="Your company name"
                     />
                   </div>
-                  <div>
-                    <label className="mb-2 block text-sm md:text-base font-medium text-slate-200" htmlFor="home-phone">
-                      Phone
-                    </label>
-                    <input
-                      id="home-phone"
-                      name="phone"
-                      type="tel"
-                      maxLength={INPUT_LIMITS.PHONE_MAX}
-                      className="h-12 md:h-14 w-full rounded-xl border border-slate-700 bg-slate-900/50 px-4 text-base md:text-lg text-slate-100 outline-none transition-all placeholder:text-slate-500 focus:border-primary-400 focus:ring-2 focus:ring-primary-500/20"
-                      placeholder="(555) 123-4567"
-                    />
-                  </div>
                 </div>
                 
                 <div>
@@ -390,7 +376,7 @@ export function ContactSection() {
         
         {/* Contact Information Section */}
         <div className="pt-8 border-t border-slate-800">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 max-w-2xl mx-auto">
             {/* Email */}
             <div className="flex flex-col items-center text-center space-y-3">
               <div className="w-12 h-12 rounded-full bg-primary-500/10 flex items-center justify-center">
@@ -416,35 +402,6 @@ export function ContactSection() {
                   className="text-base md:text-lg text-slate-100 hover:text-primary-400 transition-colors"
                 >
                   contact@blocknexus.tech
-                </a>
-              </div>
-            </div>
-            
-            {/* Phone */}
-            <div className="flex flex-col items-center text-center space-y-3">
-              <div className="w-12 h-12 rounded-full bg-primary-500/10 flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-primary-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p className="text-sm md:text-base font-medium text-slate-400 mb-1">Phone</p>
-                <a
-                  href="tel:+19293997010"
-                  className="text-base md:text-lg text-slate-100 hover:text-primary-400 transition-colors"
-                >
-                  (929) 399-7010
                 </a>
               </div>
             </div>
