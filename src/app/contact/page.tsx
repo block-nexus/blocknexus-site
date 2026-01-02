@@ -88,7 +88,7 @@ export default function ContactPage() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm md:text-base font-medium text-slate-400 mb-1">Location</p>
+                  <p className="text-sm md:text-base font-medium text-slate-400 mb-1">Headquarters</p>
                   <p className="text-base md:text-lg text-slate-100">New York City</p>
                 </div>
               </div>
