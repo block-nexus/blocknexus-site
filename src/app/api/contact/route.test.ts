@@ -128,7 +128,9 @@ describe('Contact Form API Route', () => {
       const data = await response.json();
 
       expect(response.status).toBe(403);
-      expect(data.error).toBe('Origin or Referer header required');
+      expect(data.detail).toBe('Origin or Referer header required');
+      expect(data.status).toBe(403);
+      expect(data.title).toBe('Forbidden');
     });
 
     it('should accept requests with valid origin header', async () => {
@@ -161,7 +163,8 @@ describe('Contact Form API Route', () => {
       const data = await response.json();
 
       expect(response.status).toBe(403);
-      expect(data.error).toBe('Invalid origin');
+      expect(data.detail).toBe('Invalid origin');
+      expect(data.title).toBe('Forbidden');
     });
 
     it('should prevent subdomain spoofing attacks', async () => {
@@ -180,7 +183,8 @@ describe('Contact Form API Route', () => {
 
       // Should reject because host doesn't match exactly
       expect(response.status).toBe(403);
-      expect(data.error).toBe('Invalid referer');
+      expect(data.detail).toBe('Invalid referer');
+      expect(data.title).toBe('Forbidden');
     });
 
     it('should accept valid referer with subpath', async () => {
@@ -218,7 +222,8 @@ describe('Contact Form API Route', () => {
       const data = await response.json();
 
       expect(response.status).toBe(415);
-      expect(data.error).toBe('Invalid content type');
+      expect(data.detail).toBe('Invalid content type');
+      expect(data.title).toBe('Unsupported Media Type');
     });
   });
 
@@ -246,7 +251,8 @@ describe('Contact Form API Route', () => {
       const data = await response.json();
 
       expect(response.status).toBe(429);
-      expect(data.error).toBe(ERROR_MESSAGES.FORM_RATE_LIMIT);
+      expect(data.detail).toBe(ERROR_MESSAGES.FORM_RATE_LIMIT);
+      expect(data.title).toBe('Too Many Requests');
       expect(response.headers.get('Retry-After')).toBeTruthy();
     });
 
@@ -291,7 +297,8 @@ describe('Contact Form API Route', () => {
       const data = await response.json();
 
       expect(response.status).toBe(413);
-      expect(data.error).toBe('Request too large');
+      expect(data.detail).toBe('Request too large');
+      expect(data.title).toBe('Payload Too Large');
     });
 
     it('should reject requests with body exceeding size limit after reading', async () => {
@@ -307,7 +314,8 @@ describe('Contact Form API Route', () => {
       const data = await response.json();
 
       expect(response.status).toBe(413);
-      expect(data.error).toBe('Request too large');
+      expect(data.detail).toBe('Request body exceeds size limit');
+      expect(data.title).toBe('Payload Too Large');
     });
   });
 
@@ -324,8 +332,8 @@ describe('Contact Form API Route', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe(ERROR_MESSAGES.FORM_INVALID);
-      expect(data.details).toBe('Invalid JSON in request body');
+      expect(data.detail).toBe('Invalid JSON in request body');
+      expect(data.title).toBe('Bad Request');
     });
 
     it('should reject non-object JSON (arrays)', async () => {
@@ -340,7 +348,8 @@ describe('Contact Form API Route', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe(ERROR_MESSAGES.FORM_INVALID);
+      expect(data.detail).toBe('Request body must be a JSON object');
+      expect(data.title).toBe('Bad Request');
     });
 
     it('should reject null JSON', async () => {
@@ -355,7 +364,8 @@ describe('Contact Form API Route', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe(ERROR_MESSAGES.FORM_INVALID);
+      expect(data.detail).toBe('Request body must be a JSON object');
+      expect(data.title).toBe('Bad Request');
     });
   });
 
@@ -376,7 +386,8 @@ describe('Contact Form API Route', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe(ERROR_MESSAGES.FORM_INVALID);
+      expect(data.detail).toBe('Invalid field types or missing consent');
+      expect(data.title).toBe('Bad Request');
     });
 
     it('should reject requests with wrong consent value', async () => {
@@ -396,7 +407,8 @@ describe('Contact Form API Route', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe(ERROR_MESSAGES.FORM_INVALID);
+      expect(data.detail).toBe('Invalid field types or missing consent');
+      expect(data.title).toBe('Bad Request');
     });
 
     it('should reject requests with non-string name field', async () => {
@@ -416,7 +428,8 @@ describe('Contact Form API Route', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe(ERROR_MESSAGES.FORM_INVALID);
+      expect(data.detail).toBe('Invalid field types or missing consent');
+      expect(data.title).toBe('Bad Request');
     });
 
     it('should handle short names safely (no substring crash)', async () => {
@@ -482,8 +495,8 @@ describe('Contact Form API Route', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe(ERROR_MESSAGES.FORM_INVALID);
-      expect(data.details).toBe('Input too large');
+      expect(data.detail).toBe('Input too large or contains invalid characters');
+      expect(data.title).toBe('Bad Request');
     });
   });
 
@@ -519,7 +532,7 @@ describe('Contact Form API Route', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe(ERROR_MESSAGES.FORM_INVALID);
+      expect(data.detail).toBe(ERROR_MESSAGES.FORM_INVALID);
     });
   });
 
@@ -588,7 +601,8 @@ describe('Contact Form API Route', () => {
       const data = await response.json();
 
       expect(response.status).toBe(500);
-      expect(data.error).toBe(ERROR_MESSAGES.FORM_SUBMISSION_FAILED);
+      expect(data.detail).toBe(ERROR_MESSAGES.FORM_SUBMISSION_FAILED);
+      expect(data.title).toBe('Internal Server Error');
     });
 
     it('should include request ID in error responses', async () => {
@@ -608,7 +622,9 @@ describe('Contact Form API Route', () => {
       const data = await response.json();
 
       expect(response.status).toBe(405);
-      expect(data.error).toBe('Method not allowed');
+      expect(data.detail).toBe('Method not allowed');
+      expect(data.title).toBe('Method Not Allowed');
+      expect(response.headers.get('Allow')).toBe('POST');
     });
   });
 });

@@ -28,8 +28,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         window.localStorage.removeItem('theme');
         setTheme('dark');
         document.documentElement.setAttribute('data-theme', 'dark');
-        // Log potential XSS attempt (in development only)
+        // FIX: Log potential XSS attempt (in development only)
         if (process.env.NODE_ENV === 'development') {
+          // eslint-disable-next-line no-console
           console.warn('Invalid theme value detected and removed:', stored);
         }
       } else {
@@ -37,8 +38,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         document.documentElement.setAttribute('data-theme', 'dark');
       }
     } catch (error) {
-      // localStorage unavailable (private browsing, etc.)
-      console.warn('localStorage unavailable:', error);
+      // FIX: localStorage unavailable (private browsing, etc.) - only log in development
+      if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
+        console.warn('localStorage unavailable:', error);
+      }
       document.documentElement.setAttribute('data-theme', 'dark');
     }
   }, []);
@@ -51,8 +55,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       document.documentElement.setAttribute('data-theme', theme);
       window.localStorage.setItem('theme', theme);
     } catch (error) {
-      // localStorage unavailable (private browsing, etc.)
-      console.warn('localStorage unavailable:', error);
+      // FIX: localStorage unavailable (private browsing, etc.) - only log in development
+      if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
+        console.warn('localStorage unavailable:', error);
+      }
       document.documentElement.setAttribute('data-theme', theme);
     }
   }, [theme]);

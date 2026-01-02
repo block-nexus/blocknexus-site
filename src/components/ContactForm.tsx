@@ -112,7 +112,13 @@ export function ContactForm() {
       }
 
       if (!response.ok) {
-        throw new Error(result.error || ERROR_MESSAGES.FORM_SUBMISSION_FAILED);
+        // Extract error message from problem details format
+        const errorMessage = result.detail || result.error || result.message || ERROR_MESSAGES.FORM_SUBMISSION_FAILED;
+        const error = new Error(errorMessage) as Error & { responseData?: unknown; statusCode?: number };
+        // Attach response data for debugging
+        error.responseData = result;
+        error.statusCode = response.status;
+        throw error;
       }
 
       setStatus('success');
@@ -123,33 +129,37 @@ export function ContactForm() {
       // Form is already disabled when status is 'success', so no need to reset
       // This prevents any scroll issues from form reset
     } catch (error) {
-      // Log errors for debugging (always log errors, but sanitize in production)
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Form submission error:', error);
-      }
+      // Log errors for debugging
+      // eslint-disable-next-line no-console
+      console.error('Form submission error:', error);
+      
       setStatus('error');
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
           setErrorMessage(ERROR_MESSAGES.NETWORK_ERROR);
         } else {
-          // Sanitize error messages to prevent information leakage
-          const safeErrorMessages: Record<string, string> = {
-            'rate limit': ERROR_MESSAGES.FORM_RATE_LIMIT,
-            'invalid origin': ERROR_MESSAGES.FORM_SUBMISSION_FAILED,
-            'invalid referer': ERROR_MESSAGES.FORM_SUBMISSION_FAILED,
-            'request too large': ERROR_MESSAGES.FORM_SUBMISSION_FAILED,
-            'file uploads not allowed': ERROR_MESSAGES.FORM_INVALID,
-          };
+          // Check for specific error types
+          const errorMessage = error.message.toLowerCase();
+          const statusCode = 'statusCode' in error && typeof error.statusCode === 'number' ? error.statusCode : undefined;
           
-          const errorKey = Object.keys(safeErrorMessages).find(key => 
-            error.message.toLowerCase().includes(key.toLowerCase())
-          );
-          
-          if (errorKey) {
-            setErrorMessage(safeErrorMessages[errorKey]);
+          // Map specific errors to user-friendly messages
+          if (errorMessage.includes('rate limit') || statusCode === 429) {
+            setErrorMessage(ERROR_MESSAGES.FORM_RATE_LIMIT);
+          } else if (errorMessage.includes('invalid origin') || errorMessage.includes('invalid referer') || statusCode === 403) {
+            // CSRF/Origin error - show generic message but log details
+            console.error('CSRF/Origin validation failed. Check allowed origins configuration.');
+            setErrorMessage('Security validation failed. Please refresh the page and try again.');
+          } else if (errorMessage.includes('request too large') || statusCode === 413) {
+            setErrorMessage('Request too large. Please shorten your message.');
+          } else if (errorMessage.includes('file uploads not allowed')) {
+            setErrorMessage(ERROR_MESSAGES.FORM_INVALID);
           } else {
-            // Don't expose unknown error messages (security: prevent information leakage)
-            setErrorMessage(ERROR_MESSAGES.FORM_SUBMISSION_FAILED);
+            // In development, show more details. In production, show generic message
+            if (process.env.NODE_ENV === 'development') {
+              setErrorMessage(error.message || ERROR_MESSAGES.FORM_SUBMISSION_FAILED);
+            } else {
+              setErrorMessage(ERROR_MESSAGES.FORM_SUBMISSION_FAILED);
+            }
           }
         }
       } else {

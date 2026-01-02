@@ -37,6 +37,11 @@ export const SECURITY_CONFIG = {
   MAX_BODY_SIZE: 10 * 1024, // 10KB
   ALLOWED_ORIGINS: [
     'https://blocknexus.tech',
+    // Allow Vercel preview deployments
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+    // Allow custom domain if set
+    process.env.NEXT_PUBLIC_SITE_URL ? new URL(process.env.NEXT_PUBLIC_SITE_URL).origin : null,
+    // Development
     process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : null,
   ].filter(Boolean) as string[],
 } as const;
