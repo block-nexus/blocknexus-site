@@ -16,13 +16,23 @@ interface PortfolioItem {
   results?: string[];
 }
 
+// Helper function to generate screenshot URL using a screenshot service
+// Using screenshotapi.net free tier (or you can use your own API key)
+// Alternative services: api.screenshotmachine.com, screenshot.rocks
+function getScreenshotUrl(website: string): string {
+  const encodedUrl = encodeURIComponent(website);
+  // Using screenshotapi.net - free tier allows basic screenshots
+  // If you have an API key, add: &key=YOUR_API_KEY
+  return `https://api.screenshotapi.net/screenshot?url=${encodedUrl}&width=1200&height=800&format=png&full_page=false`;
+}
+
 const portfolioItems: PortfolioItem[] = [
   {
     title: 'Konkani.ai',
     description: 'World\'s first AI-powered Konkani language learning application, revolutionizing how people learn and preserve the Konkani language through intelligent, personalized instruction. The platform combines advanced natural language processing with culturally-rich content to create an immersive learning experience.',
     category: 'AI & Education',
     website: 'https://konkani.ai',
-    screenshot: '/portfolio/konkani-ai.png', // Add screenshot to public/portfolio/
+    screenshot: getScreenshotUrl('https://konkani.ai'),
     icon: (
       <IconBox variant="primary">
         <BrainIcon />
@@ -41,7 +51,7 @@ const portfolioItems: PortfolioItem[] = [
     description: 'Next-generation darts platform featuring intelligent auto-scoring, real-time game analysis, and personalized performance feedback. Transforms traditional darts into a data-driven sport with AI-powered insights that help players improve their game through advanced analytics and coaching recommendations.',
     category: 'AI & Sports Tech',
     website: 'https://dartmaster.ai',
-    screenshot: '/portfolio/dartmaster-ai.png', // Add screenshot to public/portfolio/
+    screenshot: getScreenshotUrl('https://dartmaster.ai'),
     icon: (
       <IconBox variant="emerald">
         <ChartIcon />
@@ -60,7 +70,7 @@ const portfolioItems: PortfolioItem[] = [
     description: 'The "do anything with AI" platform—a comprehensive ecosystem of AI-powered tools designed to enhance daily life. From learning and cooking to writing, coding, investing, and shopping, GWITH.ai provides intelligent solutions that adapt to user needs across multiple domains.',
     category: 'AI Platform',
     website: 'https://gwith.ai',
-    screenshot: '/portfolio/gwith-ai.png', // Add screenshot to public/portfolio/
+    screenshot: getScreenshotUrl('https://gwith.ai'),
     icon: (
       <IconBox variant="primary">
         <RocketIcon />
@@ -79,7 +89,7 @@ const portfolioItems: PortfolioItem[] = [
     description: 'Comprehensive pet care reminder and health tracking application with AI-based health insights. Helps pet owners proactively manage their pets\' well-being through intelligent reminders, health trend analysis, and early warning systems that identify potential health issues before they become serious.',
     category: 'AI & Healthcare',
     website: 'https://vitapet.ai',
-    screenshot: '/portfolio/vitalpet-ai.png', // Add screenshot to public/portfolio/
+    screenshot: getScreenshotUrl('https://vitapet.ai'),
     icon: (
       <IconBox variant="emerald">
         <ShieldIcon />
@@ -98,18 +108,36 @@ const portfolioItems: PortfolioItem[] = [
 // Client component for image with error handling
 function PortfolioImage({ src, alt }: { src: string; alt: string }) {
   const [imageError, setImageError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  if (imageError) return null;
+  if (imageError) {
+    return (
+      <div className="mb-6 -mx-6 -mt-6 md:-mx-8 md:-mt-8 overflow-hidden rounded-t-3xl">
+        <div className="relative w-full h-48 bg-slate-800/50 flex items-center justify-center">
+          <div className="text-slate-500 text-sm">Screenshot unavailable</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mb-6 -mx-6 -mt-6 md:-mx-8 md:-mt-8 overflow-hidden rounded-t-3xl">
       <div className="relative w-full h-48 bg-slate-800/50">
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-8 h-8 border-2 border-primary-400 border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
         <Image
           src={src}
           alt={alt}
           fill
-          className="object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+          className={`object-cover opacity-80 group-hover:opacity-100 transition-opacity ${
+            isLoading ? 'opacity-0' : 'opacity-80'
+          }`}
           onError={() => setImageError(true)}
+          onLoad={() => setIsLoading(false)}
+          unoptimized={src.startsWith('http')} // Allow external images without optimization
         />
       </div>
     </div>

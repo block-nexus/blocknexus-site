@@ -1,6 +1,42 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'konkani.ai',
+      },
+      {
+        protocol: 'https',
+        hostname: 'dartmaster.ai',
+      },
+      {
+        protocol: 'https',
+        hostname: 'gwith.ai',
+      },
+      {
+        protocol: 'https',
+        hostname: 'vitapet.ai',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.screenshotmachine.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'screenshotapi.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'screenshot.rocks',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.vercel.app',
+      },
+    ],
+  },
   async headers() {
     return [
       {
