@@ -109,28 +109,51 @@ const portfolioItems: PortfolioItem[] = [
 ];
 
 // Client component for image with error handling and fallback
-function PortfolioImage({ src, alt, fallback }: { src: string; alt: string; fallback?: string }) {
+function PortfolioImage({ src, alt, fallback, website }: { src: string; alt: string; fallback?: string; website?: string }) {
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentSrc, setCurrentSrc] = useState(src);
+  const [retryCount, setRetryCount] = useState(0);
 
   const handleError = () => {
-    if (fallback && currentSrc !== fallback) {
-      // Try fallback image
+    if (fallback && currentSrc !== fallback && retryCount === 0) {
+      // Try fallback image first
       setCurrentSrc(fallback);
       setImageError(false);
       setIsLoading(true);
+      setRetryCount(1);
     } else {
-      // Both failed
+      // Both failed - show placeholder
       setImageError(true);
+      setIsLoading(false);
     }
   };
 
   if (imageError) {
+    // Show a nice placeholder with website info
+    const domain = website ? new URL(website).hostname.replace('www.', '') : 'Website';
     return (
       <div className="mb-6 -mx-6 -mt-6 md:-mx-8 md:-mt-8 overflow-hidden rounded-t-3xl">
-        <div className="relative w-full h-48 bg-slate-800/50 flex items-center justify-center">
-          <div className="text-slate-500 text-sm">Screenshot unavailable</div>
+        <div className="relative w-full h-48 bg-gradient-to-br from-slate-800 via-slate-800/90 to-slate-900 flex items-center justify-center border border-slate-700/50">
+          <div className="text-center p-4">
+            <div className="w-16 h-16 mx-auto mb-3 rounded-lg bg-primary-500/10 flex items-center justify-center border border-primary-500/20">
+              <svg
+                className="w-8 h-8 text-primary-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+                />
+              </svg>
+            </div>
+            <p className="text-sm font-medium text-slate-300 mb-1">{domain}</p>
+            <p className="text-xs text-slate-500">Screenshot loading...</p>
+          </div>
         </div>
       </div>
     );
@@ -140,8 +163,11 @@ function PortfolioImage({ src, alt, fallback }: { src: string; alt: string; fall
     <div className="mb-6 -mx-6 -mt-6 md:-mx-8 md:-mt-8 overflow-hidden rounded-t-3xl">
       <div className="relative w-full h-48 bg-slate-800/50">
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center z-10">
-            <div className="w-8 h-8 border-2 border-primary-400 border-t-transparent rounded-full animate-spin" />
+          <div className="absolute inset-0 flex items-center justify-center z-10 bg-slate-800/80">
+            <div className="text-center">
+              <div className="w-8 h-8 border-2 border-primary-400 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+              <p className="text-xs text-slate-400">Loading screenshot...</p>
+            </div>
           </div>
         )}
         <Image
@@ -154,6 +180,7 @@ function PortfolioImage({ src, alt, fallback }: { src: string; alt: string; fall
           onError={handleError}
           onLoad={() => setIsLoading(false)}
           unoptimized={currentSrc.startsWith('/api/') || currentSrc.startsWith('http')}
+          priority={false}
         />
       </div>
     </div>
@@ -194,6 +221,7 @@ export function Portfolio() {
                     src={item.screenshot}
                     alt={`${item.title} screenshot`}
                     fallback={item.fallbackScreenshot}
+                    website={item.website}
                   />
                 )}
 

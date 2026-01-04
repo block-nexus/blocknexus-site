@@ -39,38 +39,47 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Use screenshotapi.net or similar service
-  // You can add your API key here if needed: process.env.SCREENSHOT_API_KEY
-  const screenshotApiUrl = `https://api.screenshotapi.net/screenshot?url=${encodeURIComponent(url)}&width=1200&height=800&format=png&full_page=false`;
+  // Try multiple screenshot services for reliability
+  // Service 1: screenshot.rocks (free, no API key needed)
+  const screenshotServices = [
+    `https://screenshot.rocks/api?url=${encodeURIComponent(url)}&width=1200&height=800&format=png`,
+    `https://api.screenshotapi.net/screenshot?url=${encodeURIComponent(url)}&width=1200&height=800&format=png&full_page=false`,
+  ];
 
-  try {
-    const response = await fetch(screenshotApiUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      },
-      // Add timeout
-      signal: AbortSignal.timeout(10000), // 10 second timeout
-    });
+  for (const screenshotApiUrl of screenshotServices) {
+    try {
+      const response = await fetch(screenshotApiUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'image/png,image/*,*/*',
+        },
+        // Add timeout
+        signal: AbortSignal.timeout(15000), // 15 second timeout
+      });
 
-    if (!response.ok) {
-      throw new Error(`Screenshot API returned ${response.status}`);
+      if (response.ok && response.headers.get('content-type')?.includes('image')) {
+        const imageBuffer = await response.arrayBuffer();
+
+        // Return the image with appropriate headers
+        return new NextResponse(imageBuffer, {
+          status: 200,
+          headers: {
+            'Content-Type': 'image/png',
+            'Cache-Control': 'public, max-age=86400, s-maxage=86400', // Cache for 24 hours
+          },
+        });
+      }
+    } catch (error) {
+      // Try next service
+      console.warn(`Screenshot service failed, trying next: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      continue;
     }
-
-    const imageBuffer = await response.arrayBuffer();
-
-    // Return the image with appropriate headers
-    return new NextResponse(imageBuffer, {
-      status: 200,
-      headers: {
-        'Content-Type': 'image/png',
-        'Cache-Control': 'public, max-age=86400, s-maxage=86400', // Cache for 24 hours
-      },
-    });
-  } catch (error) {
-    console.error('Screenshot fetch error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch screenshot' },
-      { status: 500 }
-    );
   }
+
+  // All services failed
+  console.error('All screenshot services failed for URL:', url);
+  return NextResponse.json(
+    { error: 'Failed to fetch screenshot from all services' },
+    { status: 500 }
+  );
 }
