@@ -12,18 +12,17 @@ interface PortfolioItem {
   icon: ReactNode;
   website: string;
   screenshot?: string;
+  fallbackScreenshot?: string; // Local fallback image path
   technologies?: string[];
   results?: string[];
 }
 
-// Helper function to generate screenshot URL using a screenshot service
-// Using screenshotapi.net free tier (or you can use your own API key)
-// Alternative services: api.screenshotmachine.com, screenshot.rocks
+// Helper function to generate screenshot URL using our Next.js API route
+// This proxies the screenshot request for better security and reliability
 function getScreenshotUrl(website: string): string {
   const encodedUrl = encodeURIComponent(website);
-  // Using screenshotapi.net - free tier allows basic screenshots
-  // If you have an API key, add: &key=YOUR_API_KEY
-  return `https://api.screenshotapi.net/screenshot?url=${encodedUrl}&width=1200&height=800&format=png&full_page=false`;
+  // Use our internal API route that proxies screenshot requests
+  return `/api/screenshot?url=${encodedUrl}`;
 }
 
 const portfolioItems: PortfolioItem[] = [
@@ -33,6 +32,7 @@ const portfolioItems: PortfolioItem[] = [
     category: 'AI & Education',
     website: 'https://konkani.ai',
     screenshot: getScreenshotUrl('https://konkani.ai'),
+    fallbackScreenshot: '/portfolio/konkani-ai.png',
     icon: (
       <IconBox variant="primary">
         <BrainIcon />
@@ -52,6 +52,7 @@ const portfolioItems: PortfolioItem[] = [
     category: 'AI & Sports Tech',
     website: 'https://dartmaster.ai',
     screenshot: getScreenshotUrl('https://dartmaster.ai'),
+    fallbackScreenshot: '/portfolio/dartmaster-ai.png',
     icon: (
       <IconBox variant="emerald">
         <ChartIcon />
@@ -71,6 +72,7 @@ const portfolioItems: PortfolioItem[] = [
     category: 'AI Platform',
     website: 'https://gwith.ai',
     screenshot: getScreenshotUrl('https://gwith.ai'),
+    fallbackScreenshot: '/portfolio/gwith-ai.png',
     icon: (
       <IconBox variant="primary">
         <RocketIcon />
@@ -90,6 +92,7 @@ const portfolioItems: PortfolioItem[] = [
     category: 'AI & Healthcare',
     website: 'https://vitapet.ai',
     screenshot: getScreenshotUrl('https://vitapet.ai'),
+    fallbackScreenshot: '/portfolio/vitalpet-ai.png',
     icon: (
       <IconBox variant="emerald">
         <ShieldIcon />
@@ -105,10 +108,23 @@ const portfolioItems: PortfolioItem[] = [
   },
 ];
 
-// Client component for image with error handling
-function PortfolioImage({ src, alt }: { src: string; alt: string }) {
+// Client component for image with error handling and fallback
+function PortfolioImage({ src, alt, fallback }: { src: string; alt: string; fallback?: string }) {
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentSrc, setCurrentSrc] = useState(src);
+
+  const handleError = () => {
+    if (fallback && currentSrc !== fallback) {
+      // Try fallback image
+      setCurrentSrc(fallback);
+      setImageError(false);
+      setIsLoading(true);
+    } else {
+      // Both failed
+      setImageError(true);
+    }
+  };
 
   if (imageError) {
     return (
@@ -124,20 +140,20 @@ function PortfolioImage({ src, alt }: { src: string; alt: string }) {
     <div className="mb-6 -mx-6 -mt-6 md:-mx-8 md:-mt-8 overflow-hidden rounded-t-3xl">
       <div className="relative w-full h-48 bg-slate-800/50">
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center z-10">
             <div className="w-8 h-8 border-2 border-primary-400 border-t-transparent rounded-full animate-spin" />
           </div>
         )}
         <Image
-          src={src}
+          src={currentSrc}
           alt={alt}
           fill
           className={`object-cover opacity-80 group-hover:opacity-100 transition-opacity ${
             isLoading ? 'opacity-0' : 'opacity-80'
           }`}
-          onError={() => setImageError(true)}
+          onError={handleError}
           onLoad={() => setIsLoading(false)}
-          unoptimized={src.startsWith('http')} // Allow external images without optimization
+          unoptimized={currentSrc.startsWith('/api/') || currentSrc.startsWith('http')}
         />
       </div>
     </div>
@@ -173,7 +189,13 @@ export function Portfolio() {
                 </div>
 
                 {/* Screenshot/Image */}
-                {item.screenshot && <PortfolioImage src={item.screenshot} alt={`${item.title} screenshot`} />}
+                {item.screenshot && (
+                  <PortfolioImage
+                    src={item.screenshot}
+                    alt={`${item.title} screenshot`}
+                    fallback={item.fallbackScreenshot}
+                  />
+                )}
 
                 {/* Icon */}
                 <div className="transition-transform group-hover:scale-110 mb-6">

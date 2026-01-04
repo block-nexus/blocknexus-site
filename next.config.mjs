@@ -31,10 +31,6 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'screenshot.rocks',
       },
-      {
-        protocol: 'https',
-        hostname: '**.vercel.app',
-      },
     ],
   },
   async headers() {
