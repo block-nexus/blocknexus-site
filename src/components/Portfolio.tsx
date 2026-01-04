@@ -13,6 +13,7 @@ interface PortfolioItem {
   website: string;
   screenshot?: string;
   fallbackScreenshot?: string; // Local fallback image path
+  ogImage?: string; // Open Graph image URL
   technologies?: string[];
   results?: string[];
 }
@@ -25,6 +26,19 @@ function getScreenshotUrl(website: string): string {
   return `/api/screenshot?url=${encodedUrl}`;
 }
 
+// Helper to get Open Graph image URL (many sites provide these)
+function getOGImageUrl(website: string): string | null {
+  const hostname = new URL(website).hostname.replace('www.', '');
+  // Some sites have predictable OG image paths
+  const ogImageMap: Record<string, string> = {
+    'konkani.ai': 'https://konkani.ai/og-image.png',
+    'dartmaster.ai': 'https://dartmaster.ai/og-image.png',
+    'gwith.ai': 'https://gwith.ai/og-image.png',
+    'vitapet.ai': 'https://vitapet.ai/og-image.png',
+  };
+  return ogImageMap[hostname] || null;
+}
+
 const portfolioItems: PortfolioItem[] = [
   {
     title: 'Konkani.ai',
@@ -33,6 +47,7 @@ const portfolioItems: PortfolioItem[] = [
     website: 'https://konkani.ai',
     screenshot: getScreenshotUrl('https://konkani.ai'),
     fallbackScreenshot: '/portfolio/konkani-ai.png',
+    ogImage: getOGImageUrl('https://konkani.ai') || undefined,
     icon: (
       <IconBox variant="primary">
         <BrainIcon />
@@ -53,6 +68,7 @@ const portfolioItems: PortfolioItem[] = [
     website: 'https://dartmaster.ai',
     screenshot: getScreenshotUrl('https://dartmaster.ai'),
     fallbackScreenshot: '/portfolio/dartmaster-ai.png',
+    ogImage: getOGImageUrl('https://dartmaster.ai') || undefined,
     icon: (
       <IconBox variant="emerald">
         <ChartIcon />
@@ -73,6 +89,7 @@ const portfolioItems: PortfolioItem[] = [
     website: 'https://gwith.ai',
     screenshot: getScreenshotUrl('https://gwith.ai'),
     fallbackScreenshot: '/portfolio/gwith-ai.png',
+    ogImage: getOGImageUrl('https://gwith.ai') || undefined,
     icon: (
       <IconBox variant="primary">
         <RocketIcon />
@@ -93,6 +110,7 @@ const portfolioItems: PortfolioItem[] = [
     website: 'https://vitapet.ai',
     screenshot: getScreenshotUrl('https://vitapet.ai'),
     fallbackScreenshot: '/portfolio/vitalpet-ai.png',
+    ogImage: getOGImageUrl('https://vitapet.ai') || undefined,
     icon: (
       <IconBox variant="emerald">
         <ShieldIcon />
@@ -109,21 +127,28 @@ const portfolioItems: PortfolioItem[] = [
 ];
 
 // Client component for image with error handling and fallback
-function PortfolioImage({ src, alt, fallback, website }: { src: string; alt: string; fallback?: string; website?: string }) {
+function PortfolioImage({ src, alt, fallback, ogImage, website }: { src: string; alt: string; fallback?: string; ogImage?: string; website?: string }) {
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentSrc, setCurrentSrc] = useState(src);
   const [retryCount, setRetryCount] = useState(0);
 
   const handleError = () => {
+    // Try fallback sources in order: local image -> OG image -> placeholder
     if (fallback && currentSrc !== fallback && retryCount === 0) {
-      // Try fallback image first
+      // Try local fallback image
       setCurrentSrc(fallback);
       setImageError(false);
       setIsLoading(true);
       setRetryCount(1);
+    } else if (ogImage && currentSrc !== ogImage && retryCount === 1) {
+      // Try OG image
+      setCurrentSrc(ogImage);
+      setImageError(false);
+      setIsLoading(true);
+      setRetryCount(2);
     } else {
-      // Both failed - show placeholder
+      // All failed - show placeholder
       setImageError(true);
       setIsLoading(false);
     }
@@ -221,6 +246,7 @@ export function Portfolio() {
                     src={item.screenshot}
                     alt={`${item.title} screenshot`}
                     fallback={item.fallbackScreenshot}
+                    ogImage={item.ogImage}
                     website={item.website}
                   />
                 )}
