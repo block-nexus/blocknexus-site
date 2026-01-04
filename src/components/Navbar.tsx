@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 const navItems = [
+  { href: '/', label: 'Home', id: 'home' },
   { href: '/#services', label: 'Services', id: 'services' },
   { href: '/#portfolio', label: 'Portfolio', id: 'portfolio' },
   { href: '/#contact', label: 'Contact', id: 'contact' },
@@ -49,9 +50,9 @@ export function Navbar() {
         }
       }
 
-      // If scrolled to top, clear active section
+      // If scrolled to top, set active section to 'home'
       if (scrollY < 100) {
-        setActiveSection('');
+        setActiveSection('home');
       }
     };
 
@@ -98,6 +99,14 @@ export function Navbar() {
   const handleInPageClick = (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (pathname === '/') {
       e.preventDefault();
+      
+      // Handle home link - scroll to top
+      if (id === 'home') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setActiveSection('home');
+        return;
+      }
+      
       // Sanitize ID to prevent XSS
       const sanitizedId = id.replace(/[^a-zA-Z0-9-]/g, '');
       // Only allow whitelisted IDs (prevents scroll hijacking)
@@ -133,12 +142,21 @@ export function Navbar() {
         <div className="flex items-center gap-6">
           <nav className="hidden items-center gap-8 md:flex">
             {navItems.map((item) => {
+              // For home link, check if we're at the top of the page
               const isActive = pathname === '/' && activeSection === item.id;
+              const isHomeLink = item.id === 'home';
+              
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={handleInPageClick(item.id)}
+                  onClick={isHomeLink ? (e) => {
+                    if (pathname === '/') {
+                      e.preventDefault();
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      setActiveSection('home');
+                    }
+                  } : handleInPageClick(item.id)}
                   className="relative group"
                 >
                   <span
